@@ -3,7 +3,6 @@
 ![Java](https://img.shields.io/badge/Java-21-blue.svg)
 ![JavaFX](https://img.shields.io/badge/JavaFX-21-orange.svg)
 ![Maven](https://img.shields.io/badge/Build-Maven-brightgreen.svg)
-![Test](https://img.shields.io/badge/Tests-JUnit_5-success.svg)
 
 Un'implementazione del classico gioco arcade **Tron**, sviluppata in **Java 21** e **JavaFX**. 
 Il core engine è basato su un'architettura **MVC** stretta, con l'aggiunta di un layer di Intelligenza Artificiale basato su **Answer Set Programming (ASP)** per la gestione delle logiche decisionali dell'avversario.
@@ -15,7 +14,6 @@ Il progetto è progettato seguendo i principi **SOLID** ed è modulato per garan
 * **Linguaggio:** Java 21
 * **UI Framework:** JavaFX 21.0.6
 * **Build Tool:** Maven
-* **Testing:** JUnit 5.12.1
 * **AI & Reasoning:** Answer Set Programming (ASP) per il calcolo delle path ottimali e logica decisionale.
 
 ### Project Structure
