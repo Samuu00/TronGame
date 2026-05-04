@@ -13,7 +13,7 @@ Il core engine è basato su un'architettura **MVC** stretta, con l'aggiunta di u
 Il progetto è progettato seguendo i principi **SOLID** ed è modulato per garantire una facile estensibilità, separando la logica di dominio dalla presentazione e dal reasoning dell'AI.
 
 * **Linguaggio:** Java 21
-* **UI Framework:** JavaFX 21.0.6
+* **UI Framework:** JavaFX 21.0.6, EmbASP
 * **Build Tool:** Maven
 * **AI & Reasoning:** Answer Set Programming (ASP) per il calcolo delle path ottimali e logica decisionale.
 
