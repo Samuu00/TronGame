@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-21-blue.svg)
 ![JavaFX](https://img.shields.io/badge/JavaFX-21-orange.svg)
 ![Maven](https://img.shields.io/badge/Build-Maven-brightgreen.svg)
-[![Paradigm: ASP](https://img.shields.io/badge/Paradigm-ASP-blue?style=for-the-badge)](https://en.wikipedia.org/wiki/Answer_set_programming)
+![ASP](https://img.shields.io/badge/Language-ASP-blue.svg)
 
 Un'implementazione del classico gioco arcade **Tron**, sviluppata in **Java 21** e **JavaFX**. 
 Il core engine è basato su un'architettura **MVC** stretta, con l'aggiunta di un layer di Intelligenza Artificiale basato su **Answer Set Programming (ASP)** per la gestione delle logiche decisionali dell'avversario.
