@@ -38,6 +38,20 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>it.unical.mat</groupId>
+            <artifactId>embasp</artifactId>
+            <version>8.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/embASP.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.7</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/antlr-4.7-complete.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
