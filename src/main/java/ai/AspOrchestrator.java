@@ -55,7 +55,7 @@ public class AspOrchestrator {
         // Pulisce l'handler dai fatti del turno precedente
         handler.removeAll();
 
-        // 1. Carica il programma logico ASP
+        // Carica il programma logico ASP
         ASPInputProgram logic = new ASPInputProgram();
         try (InputStream in = getClass().getResourceAsStream("/asp/tron.lp")) {
             if (in == null) {
@@ -68,19 +68,12 @@ public class AspOrchestrator {
         }
         handler.addProgram(logic);
 
-        // 2. Genera e aggiunge i fatti dello stato corrente al solver
+        // Genera e aggiunge i fatti dello stato corrente al solver
         ASPInputProgram facts = factGenerator.getFacts(width, height, positions, obstacles);
         handler.addProgram(facts);
 
-        // 3. Esegue il solver
+        // Esegue il solver
         Output output = handler.startSync();
-
-        // DEBUG: stampiamo tutto l'output e gli errori
-        System.out.println("=== SOLVER RAW OUTPUT ===");
-        System.out.println(output.getOutput());
-        System.out.println("=== SOLVER ERRORS ===");
-        System.out.println(output.getErrors());
-        System.out.println("=== END SOLVER ===");
 
         if (!(output instanceof AnswerSets answerSets)) {
             System.err.println("ASP error: output is not AnswerSets, type=" + output.getClass().getName());

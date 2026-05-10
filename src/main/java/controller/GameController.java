@@ -21,9 +21,7 @@ public class GameController {
     private Map<Integer, Position> players = new HashMap<>();
     // Mappa per le direzioni correnti di ogni moto
     private Map<Integer, String> currentDirections = new HashMap<>();
-
     private final List<Obstacle> trails = new ArrayList<>();
-
     public GameController(GameView view, int size) {
         this.view = view;
         this.aiOrchestrator = new AspOrchestrator("lib/dlv2.exe");
@@ -69,8 +67,6 @@ public class GameController {
                 String move = nextMoves.get(id);
                 movePlayer(id, move);
             } else {
-                // Se l'IA non ha trovato mosse sicure, la moto è morta
-                System.out.println("Player " + id + " has no safe moves! Eliminated.");
                 toRemove.add(id);
             }
         }
@@ -91,7 +87,6 @@ public class GameController {
         if (players.size() <= 1) {
             if (players.size() == 1) {
                 int winnerId = players.keySet().iterator().next();
-                System.out.println("🏆 PLAYER " + winnerId + " WINS!");
             } else {
                 System.out.println("DRAW! All players eliminated.");
             }
@@ -115,18 +110,14 @@ public class GameController {
         for (Map.Entry<Integer, Position> entry : players.entrySet()) {
             int id = entry.getKey();
             Position p = entry.getValue();
-
             // Collisione con i bordi
             if (p.getX() < 0 || p.getX() >= width || p.getY() < 0 || p.getY() >= height) {
-                System.out.println("PLAYER " + id + " HIT THE WALL!");
                 if (!toRemove.contains(id)) toRemove.add(id);
                 continue;
             }
-
             // Collisione con le scie (escludendo quella appena aggiunta dal player stesso)
             for (Obstacle t : trails) {
                 if (t.getX() == p.getX() && t.getY() == p.getY()) {
-                    System.out.println("PLAYER " + id + " HIT A TRAIL!");
                     if (!toRemove.contains(id)) toRemove.add(id);
                     break;
                 }
