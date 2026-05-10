@@ -38,14 +38,15 @@ public class AspOrchestrator {
     }
 
     /**
-     * Calcola le mosse per tutte le moto presenti in gioco.
+     * Calcola le mosse per tutte le moto considerando anche le scie (obstacles).
      * @param width Larghezza griglia
      * @param height Altezza griglia
-     * @param positions Lista delle posizioni attuali di tutte le moto
+     * @param positions Lista delle posizioni attuali delle moto
+     * @param obstacles Lista delle scie lasciate (ostacoli)
      * @return Mappa ID Moto -> Direzione scelta
      */
-    public Map<Integer, String> computeNextMoves(int width, int height, List<Position> positions) {
-        // Pulisce l'handler per evitare accumulo di fatti tra i turni
+    public Map<Integer, String> computeNextMoves(int width, int height, List<Position> positions, List<Obstacle> obstacles) {
+        // Pulisce l'handler dai fatti del turno precedente
         handler.removeAll();
 
         // Caricamento della logica ASP fissa
@@ -54,13 +55,13 @@ public class AspOrchestrator {
         handler.addProgram(logic);
 
         // Generazione e caricamento dei fatti dinamici
-        handler.addProgram(factGenerator.getFacts(width, height, positions));
+        handler.addProgram(factGenerator.getFacts(width, height, positions, obstacles));
 
         // Esecuzione Sincrona
         Output output = handler.startSync();
         AnswerSets answerSets = (AnswerSets) output;
 
-        // Estrazione di tutte le decisioni
+        // Ora passiamo tutto al nostro nuovo ResultHandler basato su Regex
         return resultHandler.getActions(answerSets);
     }
 }

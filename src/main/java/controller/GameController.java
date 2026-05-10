@@ -2,6 +2,7 @@ package controller;
 
 import javafx.animation.AnimationTimer;
 import ai.AspOrchestrator;
+import model.Obstacle;
 import model.Position;
 import model.MoveDecision;
 import view.GameView;
@@ -20,6 +21,8 @@ public class GameController {
     private Map<Integer, Position> players = new HashMap<>();
     // Mappa per le direzioni correnti di ogni moto
     private Map<Integer, String> currentDirections = new HashMap<>();
+
+    private final List<Obstacle> trails = new ArrayList<>();
 
     public GameController(GameView view, int size) {
         this.view = view;
@@ -46,30 +49,33 @@ public class GameController {
     }
 
     private void update() {
-        // Chiedi all'IA le mosse per TUTTE le moto
-        Map<Integer, String> nextMoves = aiOrchestrator.computeNextMoves(width, height, new ArrayList<>(players.values()));
-
-        // Aggiorna direzioni e posizioni
-        for (Integer id : players.keySet()) {
-            String move = nextMoves.get(id);
-            if (move != null && !move.equals("NONE")) {
-                currentDirections.put(id, move);
-            }
-            movePlayer(id);
+        // Prima di muovere, la posizione attuale diventa un ostacolo (scia)
+        for (Position p : players.values()) {
+            trails.add(new Obstacle(p.getX(), p.getY(), p.getPlayerId()));
         }
 
-        // Rendering e Collisioni
-        checkCollisions();
+        // Chiedi all'IA
+        Map<Integer, String> nextMoves = aiOrchestrator.computeNextMoves(width, height,
+                new ArrayList<>(players.values()), trails);
 
-        // La view deve ora accettare la lista di posizioni per disegnarle tutte
-        view.renderAll(new ArrayList<>(players.values()), width, height);
+        // Muovi i player
+        for (Integer id : players.keySet()) {
+            movePlayer(id, nextMoves.getOrDefault(id, currentDirections.get(id)));
+        }
+
+        // Rendering
+        view.renderAll(new ArrayList<>(players.values()), trails, width, height);
     }
 
-    private void movePlayer(int id) {
+    private void movePlayer(int id, String dir) {
         Position p = players.get(id);
-        String dir = currentDirections.get(id).toUpperCase();
+        if (p == null) return;
 
-        switch (dir) {
+        if (p.getX() < 0 || p.getY() < 0 || p.getX() >= width || p.getY() >= height) {
+            return;
+        }
+
+        switch (dir.toUpperCase()) {
             case "UP"    -> p.setY(p.getY() - 1);
             case "DOWN"  -> p.setY(p.getY() + 1);
             case "LEFT"  -> p.setX(p.getX() - 1);
