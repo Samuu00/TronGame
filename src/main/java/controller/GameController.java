@@ -49,6 +49,8 @@ public class GameController {
     }
 
     private void update() {
+        if (players.isEmpty()) return;
+
         // Prima di muovere, la posizione attuale diventa un ostacolo (scia)
         for (Position p : players.values()) {
             trails.add(new Obstacle(p.getX(), p.getY(), p.getPlayerId()));
@@ -58,22 +60,48 @@ public class GameController {
         Map<Integer, String> nextMoves = aiOrchestrator.computeNextMoves(width, height,
                 new ArrayList<>(players.values()), trails);
 
+        // Raccogliamo i player da eliminare (nessuna mossa sicura)
+        List<Integer> toRemove = new ArrayList<>();
+
         // Muovi i player
-        for (Integer id : players.keySet()) {
-            movePlayer(id, nextMoves.getOrDefault(id, currentDirections.get(id)));
+        for (Integer id : new ArrayList<>(players.keySet())) {
+            if (nextMoves.containsKey(id)) {
+                String move = nextMoves.get(id);
+                movePlayer(id, move);
+            } else {
+                // Se l'IA non ha trovato mosse sicure, la moto è morta
+                System.out.println("Player " + id + " has no safe moves! Eliminated.");
+                toRemove.add(id);
+            }
+        }
+
+        // Controlla collisioni dopo il movimento
+        checkCollisions(toRemove);
+
+        // Rimuovi i player eliminati
+        for (Integer id : toRemove) {
+            players.remove(id);
+            currentDirections.remove(id);
         }
 
         // Rendering
         view.renderAll(new ArrayList<>(players.values()), trails, width, height);
+
+        // Check game over
+        if (players.size() <= 1) {
+            if (players.size() == 1) {
+                int winnerId = players.keySet().iterator().next();
+                System.out.println("🏆 PLAYER " + winnerId + " WINS!");
+            } else {
+                System.out.println("DRAW! All players eliminated.");
+            }
+            view.showGameOver();
+        }
     }
 
     private void movePlayer(int id, String dir) {
         Position p = players.get(id);
         if (p == null) return;
-
-        if (p.getX() < 0 || p.getY() < 0 || p.getX() >= width || p.getY() >= height) {
-            return;
-        }
 
         switch (dir.toUpperCase()) {
             case "UP"    -> p.setY(p.getY() - 1);
@@ -83,11 +111,25 @@ public class GameController {
         }
     }
 
-    private void checkCollisions() {
-        for (Position p : players.values()) {
+    private void checkCollisions(List<Integer> toRemove) {
+        for (Map.Entry<Integer, Position> entry : players.entrySet()) {
+            int id = entry.getKey();
+            Position p = entry.getValue();
+
+            // Collisione con i bordi
             if (p.getX() < 0 || p.getX() >= width || p.getY() < 0 || p.getY() >= height) {
-                System.out.println("PLAYER " + p.getPlayerId() + " HIT THE WALL!");
-                // Qui gestire l'eliminazione del player
+                System.out.println("PLAYER " + id + " HIT THE WALL!");
+                if (!toRemove.contains(id)) toRemove.add(id);
+                continue;
+            }
+
+            // Collisione con le scie (escludendo quella appena aggiunta dal player stesso)
+            for (Obstacle t : trails) {
+                if (t.getX() == p.getX() && t.getY() == p.getY()) {
+                    System.out.println("PLAYER " + id + " HIT A TRAIL!");
+                    if (!toRemove.contains(id)) toRemove.add(id);
+                    break;
+                }
             }
         }
     }

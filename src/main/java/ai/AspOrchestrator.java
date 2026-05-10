@@ -9,6 +9,11 @@ import it.unical.mat.embasp.languages.asp.AnswerSets;
 import it.unical.mat.embasp.languages.asp.ASPMapper;
 import model.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +24,7 @@ public class AspOrchestrator {
     private final Handler handler;
     private final FactGenerator factGenerator;
     private final ResultHandler resultHandler;
-    private final String logicFilePath = "src/main/resources/asp/tron.lp";
+
 
     public AspOrchestrator(String solverPath) {
         // Inizializzazione DLV2 e Handler
@@ -32,6 +37,7 @@ public class AspOrchestrator {
             ASPMapper.getInstance().registerClass(GridSize.class);
             ASPMapper.getInstance().registerClass(Position.class);
             ASPMapper.getInstance().registerClass(MoveDecision.class);
+            ASPMapper.getInstance().registerClass(Obstacle.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,19 +55,37 @@ public class AspOrchestrator {
         // Pulisce l'handler dai fatti del turno precedente
         handler.removeAll();
 
-        // Caricamento della logica ASP fissa
+        // 1. Carica il programma logico ASP
         ASPInputProgram logic = new ASPInputProgram();
-        logic.addFilesPath(logicFilePath);
+        try (InputStream in = getClass().getResourceAsStream("/asp/tron.lp")) {
+            if (in == null) {
+                throw new IllegalStateException("Risorsa /asp/tron.lp non trovata nel classpath");
+            }
+            String program = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            logic.addProgram(program);
+        } catch (IOException e) {
+            throw new RuntimeException("Impossibile leggere tron.lp", e);
+        }
         handler.addProgram(logic);
 
-        // Generazione e caricamento dei fatti dinamici
-        handler.addProgram(factGenerator.getFacts(width, height, positions, obstacles));
+        // 2. Genera e aggiunge i fatti dello stato corrente al solver
+        ASPInputProgram facts = factGenerator.getFacts(width, height, positions, obstacles);
+        handler.addProgram(facts);
 
-        // Esecuzione Sincrona
+        // 3. Esegue il solver
         Output output = handler.startSync();
-        AnswerSets answerSets = (AnswerSets) output;
 
-        // Ora passiamo tutto al nostro nuovo ResultHandler basato su Regex
+        // DEBUG: stampiamo tutto l'output e gli errori
+        System.out.println("=== SOLVER RAW OUTPUT ===");
+        System.out.println(output.getOutput());
+        System.out.println("=== SOLVER ERRORS ===");
+        System.out.println(output.getErrors());
+        System.out.println("=== END SOLVER ===");
+
+        if (!(output instanceof AnswerSets answerSets)) {
+            System.err.println("ASP error: output is not AnswerSets, type=" + output.getClass().getName());
+            return Collections.emptyMap();
+        }
         return resultHandler.getActions(answerSets);
     }
 }

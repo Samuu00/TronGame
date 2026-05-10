@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class ResultHandler {
     private static final Pattern PATTERN = Pattern.compile("next_move\\((\\d+),\"?([a-zA-Z]+)\"?\\)");
     public Map<Integer, String> getActions(AnswerSets answerSets) {
+        System.out.println("SOLVER OUTPUT: " + answerSets.getOutput());
         Map<Integer, String> decisions = new HashMap<>();
 
         if (answerSets == null || answerSets.getAnswersets().isEmpty()) {
